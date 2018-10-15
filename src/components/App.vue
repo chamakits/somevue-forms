@@ -71,7 +71,7 @@ ${this.prefixDayTime} ${this.dateTimeValFormat} ${this.postfixDayTime}
 ${this.exitPart}
 
 Regards,
-${this.toPerson}`;
+${this.fromPerson}`;
       return `abc '${this.dateTimeVal} '`;
     },
     dateTimeValFormat() {
