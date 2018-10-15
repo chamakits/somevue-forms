@@ -11,7 +11,8 @@ module.exports = {
     contentBase: path.join(__dirname, "dist"),
     compress: true,
     port: 9000,
-    public: "vue.glitch.me:9000",
+    // public: "vue.glitch.me:9000",
+    public: "localhost:9000",
     publicPath: "/dist/",
     inline: true
   },
