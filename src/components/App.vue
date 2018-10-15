@@ -18,9 +18,24 @@
           <input v-model="prefixDayTime" type="text" placeholder="Prefix date time"/>
         </div>
         <div>
-          <date-picker 
+          <!-- <date-picker 
           v-model="dateTimeVal" lang="en" type="datetime" 
-          format="YYYY-MM-DD hh:mm:ss a" :minute-step="30" ></date-picker>
+          format="YYYY-MM-DD hh:mm:ss a" :minute-step="30" ></date-picker> -->
+
+          <datetime
+            type="datetime"
+            v-model="dateTimeValString"
+            input-class="my-class"
+            value-zone="America/New_York"
+            :format="{ year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }"
+            :phrases="{ok: 'Continue', cancel: 'Exit'}"
+            :hour-step="1"
+            :minute-step="30"
+            use12-hour
+            auto
+            ></datetime>
+            <!-- <datetime v-model="dateTimeValString"></datetime> -->
+
         </div>
         <div>
           <input v-model="postfixDayTime" type="text" placeholder="Postfix date time"/>
@@ -54,12 +69,19 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import DatePicker from "vue2-datepicker";
 import moment from "moment";
 import PouchDB from "pouchdb";
 
+import {Datetime} from 'vue-datetime'
+// You need a specific loader for CSS files
+import 'vue-datetime/dist/vue-datetime.css'
+Vue.use(Datetime);
+
 export default {
-  components: { DatePicker },
+  components: { DatePicker, datetime: Datetime },
+  // components: { DatePicker },
 
   computed: {
     currentText: function() {
@@ -72,13 +94,12 @@ ${this.exitPart}
 
 Regards,
 ${this.fromPerson}`;
-      return `abc '${this.dateTimeVal} '`;
     },
     dateTimeValFormat() {
-      const datePrefixFormat = moment(this.dateTimeVal).format(
+      const datePrefixFormat = moment(this.dateTimeValString).format(
         "MMM Do, h:mm a"
       );
-      const datePostfixFormat = moment(this.dateTimeVal)
+      const datePostfixFormat = moment(this.dateTimeValString)
         .add(1, "hours")
         .format("h:mm a");
       return `${datePrefixFormat} - ${datePostfixFormat}`;
@@ -88,7 +109,7 @@ ${this.fromPerson}`;
         toPerson: this.toPerson,
         introPart: this.introPart,
         prefixDayTime: this.prefixDayTime,
-        dateTimeVal: this.dateTimeVal,
+        dateTimeValString: this.dateTimeValString,
         postfixDayTime: this.postfixDayTime,
         exitPart: this.exitPart,
         fromPerson: this.fromPerson
@@ -97,9 +118,11 @@ ${this.fromPerson}`;
   },
 
   created() {
-    this.dateTimeVal = new Date();
+    this.dateTimeValString = new Date().toString();
     this.db = new PouchDB("data");
-    this.db.get("pastValues").catch(error => {
+    this.db.get("pastValues").then(doc => {
+      // return this.db.remove(doc._id, doc._rev);
+    }).catch(error => {
       return this.db.put({
         _id: "pastValues",
         data: []
@@ -111,7 +134,8 @@ ${this.fromPerson}`;
       toPerson: "",
       introPart: "Thanks for getting back to me!",
       prefixDayTime: "How does",
-      dateTimeVal: new Date(),
+      // dateTimeVal: new Date(),
+      dateTimeValString: "",
       postfixDayTime: "sound?",
       exitPart: "Are you available then?",
       fromPerson: "",
@@ -146,7 +170,7 @@ ${this.fromPerson}`;
       this.toPerson = value.toPerson;
       this.introPart = value.introPart;
       this.prefixDayTime = value.prefixDayTime;
-      this.dateTimeVal = value.dateTimeVal;
+      this.dateTimeValString = value.dateTimeValString;
       this.postfixDayTime = value.postfixDayTime;
       this.exitPart = value.exitPart;
       this.fromPerson = value.fromPerson;

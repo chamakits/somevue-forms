@@ -12,17 +12,20 @@
   "dependencies": {
     "connect": "^3.6.0",
     "css-loader": "^0.27.3",
+    "luxon": "^1.4.3",
     "moment": "^2.22.2",
     "normalize.css": "^5.0.0",
     "pouchdb": "^7.0.0",
     "serve-static": "^1.12.1",
     "style-loader": "^0.13.2",
     "vue": "^2.5.17",
+    "vue-datetime": "^1.0.0-beta.8",
     "vue-loader": "^11.1.4",
     "vue-template-compiler": "^2.5.17",
     "vue2-datepicker": "^2.6.0",
     "webpack": "^2.2.1",
-    "webpack-dev-server": "^2.4.1"
+    "webpack-dev-server": "^2.4.1",
+    "weekstart": "^1.0.0"
   },
   "repository": {
     "url": "https://glitch.com/#!/project/welcome-project"
