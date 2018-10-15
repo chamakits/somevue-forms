@@ -32,6 +32,22 @@
           <input v-model="fromPerson" type="text" placeholder="From Person"/>
         </div>
       </div>
+      <div>
+        <button v-on:click="saveValues">Save values</button>
+      </div>
+      <div>
+        <div>
+          <button v-on:click="refreshValues">Refresh values</button>
+        </div>
+        <div>
+          <hr>
+          <div v-for="pastValue in pastValues" :key="pastValue.timeSaved">
+            <hr>
+            <button v-on:click="setValue(pastValue)">Load</button>
+            <p>{{pastValue}}</p>
+          </div>
+        </div>
+      </div>
     </main>
     <footer></footer>
   </div>
@@ -39,7 +55,9 @@
 
 <script>
 import DatePicker from "vue2-datepicker";
-import moment from "moment"
+import moment from "moment";
+import PouchDB from "pouchdb";
+
 export default {
   components: { DatePicker },
 
@@ -57,14 +75,36 @@ ${this.toPerson}`;
       return `abc '${this.dateTimeVal} '`;
     },
     dateTimeValFormat() {
-      const datePrefixFormat = moment(this.dateTimeVal).format("MMM Do, h:mm a");
-      const datePostfixFormat = moment(this.dateTimeVal).add(1, 'hours').format("h:mm a")
+      const datePrefixFormat = moment(this.dateTimeVal).format(
+        "MMM Do, h:mm a"
+      );
+      const datePostfixFormat = moment(this.dateTimeVal)
+        .add(1, "hours")
+        .format("h:mm a");
       return `${datePrefixFormat} - ${datePostfixFormat}`;
+    },
+    dataValues: function() {
+      return {
+        toPerson: this.toPerson,
+        introPart: this.introPart,
+        prefixDayTime: this.prefixDayTime,
+        dateTimeVal: this.dateTimeVal,
+        postfixDayTime: this.postfixDayTime,
+        exitPart: this.exitPart,
+        fromPerson: this.fromPerson
+      };
     }
   },
 
   created() {
     this.dateTimeVal = new Date();
+    this.db = new PouchDB("data");
+    this.db.get("pastValues").catch(error => {
+      return this.db.put({
+        _id: "pastValues",
+        data: []
+      });
+    });
   },
   data: function() {
     return {
@@ -74,16 +114,42 @@ ${this.toPerson}`;
       dateTimeVal: new Date(),
       postfixDayTime: "sound?",
       exitPart: "Are you available then?",
-      fromPerson: ""
+      fromPerson: "",
+      db: null,
+      pastValues: []
     };
   },
 
   methods: {
-    addTodo: function() {
-      this.items.push({
-        todo: this.newTodo,
-        done: false
+    saveValues: function() {
+      this.db.get("pastValues").then(pastValues => {
+        if (pastValues.data == undefined) {
+          pastValues.data = [];
+        }
+        // pastValues.data.push(this.dataValues);
+        const toInsert = this.dataValues;
+        toInsert.timeSaved = new Date();
+        pastValues.data.unshift(toInsert);
+        return this.db.put({
+          _id: "pastValues",
+          _rev: pastValues._rev,
+          data: pastValues.data
+        });
       });
+    },
+    refreshValues: function() {
+      this.db.get("pastValues").then(pastValues => {
+        this.pastValues = pastValues.data;
+      });
+    },
+    setValue: function(value) {
+      this.toPerson = value.toPerson;
+      this.introPart = value.introPart;
+      this.prefixDayTime = value.prefixDayTime;
+      this.dateTimeVal = value.dateTimeVal;
+      this.postfixDayTime = value.postfixDayTime;
+      this.exitPart = value.exitPart;
+      this.fromPerson = value.fromPerson;
     }
   }
 };
@@ -114,5 +180,9 @@ button {
 textarea.current-text {
   height: 10em;
   width: 40em;
+}
+
+input {
+  width: 20em;
 }
 </style>
